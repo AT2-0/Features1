@@ -1,23 +1,47 @@
-def generate_budgeting_advice(income, expenses, financial_goals):
-    # Calculate remaining funds after expenses
-    remaining_funds = income - sum(expenses.values())
-    
-    # Calculate total amount needed for financial goals
-    total_goals_amount = sum(financial_goals.values())
-    
-    # Determine if Bob has enough funds for his financial goals
-    if remaining_funds >= total_goals_amount:
-        advice = "You have enough funds to achieve your financial goals!"
+import streamlit as st
+import openai
+
+# Set your OpenAI API key here
+openai.api_key = "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"
+
+# Initialize GPT-3
+gpt = openai.GPT()
+
+# Function to generate community insights
+
+
+def generate_community_insights(selected_area):
+    # Generate prompt for GPT-3
+    prompt = f"Tell me about the community in {selected_area}. What amenities are available? Are there nearby schools, parks, shopping centers, or healthcare facilities?"
+
+    # Get response from GPT-3
+    response = gpt.completion.create(
+        engine="davinci",
+        prompt=prompt,
+        max_tokens=150
+    )
+
+    # Parse GPT-3 response and extract community insights
+    community_insights = response['choices'][0]['text'].strip()
+
+    return community_insights
+
+
+# Streamlit interface
+st.title("Community Insights")
+
+# Input field for area selection
+selected_area = st.text_input(
+    'Enter the area or city within the Bay Area:', 'San Francisco')
+
+# Button to generate insights
+if st.button('Generate Insights'):
+    # Call function to generate community insights
+    insights = generate_community_insights(selected_area)
+
+    # Display community insights
+    if insights:
+        st.markdown(insights)
     else:
-        shortfall = total_goals_amount - remaining_funds
-        advice = f"It seems you're short by ${shortfall:.2f} to achieve all your financial goals. You may need to reassess your expenses or consider increasing your income."
-    
-    return advice
+        st.error("Unable to generate insights. Please try again later.")
 
-# Example usage:
-income = 5000  # Bob's monthly gross income
-expenses = {'rent': 1500, 'utilities': 200, 'groceries': 300, 'transportation': 200}
-financial_goals = {'emergency_savings': 1000, 'investments': 500, 'discretionary_spending': 300}
-
-advice = generate_budgeting_advice(income, expenses, financial_goals)
-print(advice)
